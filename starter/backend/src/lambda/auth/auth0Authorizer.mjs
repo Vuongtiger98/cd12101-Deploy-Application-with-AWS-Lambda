@@ -1,14 +1,15 @@
-import Axios from 'axios'
-import jsonwebtoken from 'jsonwebtoken'
-import { createLogger } from '../../utils/logger.mjs'
+import Axios from 'axios';
+import jsonwebtoken from 'jsonwebtoken';
+import { createLogger } from '../../utils/logger.mjs';
+import middy from '@middy/core';
+import httpErrorHandler from '@middy/http-error-handler';
 
-const logger = createLogger('auth')
+const logger = createLogger('auth');
+const jwksUrl = 'https://dev-vwybuln2bv13l0dg.us.auth0.com/.well-known/jwks.json';
 
-const jwksUrl = 'https://test-endpoint.auth0.com/.well-known/jwks.json'
-
-export async function handler(event) {
+const authHandler = async (event) => {
   try {
-    const jwtToken = await verifyToken(event.authorizationToken)
+    const jwtToken = await verifyToken(event.authorizationToken);
 
     return {
       principalId: jwtToken.sub,
@@ -18,13 +19,13 @@ export async function handler(event) {
           {
             Action: 'execute-api:Invoke',
             Effect: 'Allow',
-            Resource: '*'
-          }
-        ]
-      }
-    }
+            Resource: '*',
+          },
+        ],
+      },
+    };
   } catch (e) {
-    logger.error('User not authorized', { error: e.message })
+    logger.error('User not authorized', { error: e.message, stack: e.stack });
 
     return {
       principalId: 'user',
@@ -34,26 +35,29 @@ export async function handler(event) {
           {
             Action: 'execute-api:Invoke',
             Effect: 'Deny',
-            Resource: '*'
-          }
-        ]
-      }
-    }
+            Resource: '*',
+          },
+        ],
+      },
+    };
   }
-}
+};
+
+// Wrap the handler with middy and use the error handler middleware
+export const handler = middy(authHandler).use(httpErrorHandler());
 
 async function verifyToken(authHeader) {
   const token = getToken(authHeader);
   const decodedToken = jsonwebtoken.decode(token, { complete: true });
 
-  if (!decodedToken) {
+  if (!decodedToken || !decodedToken.header || !decodedToken.header.kid) {
     throw new Error('Invalid token');
   }
 
   const kid = decodedToken.header.kid;
   const jwks = await getJwks();
 
-  const signingKey = jwks.keys.find(key => key.kid === kid);
+  const signingKey = jwks.keys.find((key) => key.kid === kid);
   if (!signingKey) {
     throw new Error('Invalid token');
   }
@@ -62,19 +66,23 @@ async function verifyToken(authHeader) {
 }
 
 async function getJwks() {
-  const response = await Axios.get(jwksUrl);
-  return response.data;
+  try {
+    const response = await Axios.get(jwksUrl);
+    return response.data;
+  } catch (error) {
+    logger.error('Failed to fetch JWKS', { error: error.message });
+    throw new Error('Unable to retrieve JWKS');
+  }
 }
 
-
 function getToken(authHeader) {
-  if (!authHeader) throw new Error('No authentication header')
+  if (!authHeader) throw new Error('No authentication header');
 
   if (!authHeader.toLowerCase().startsWith('bearer '))
-    throw new Error('Invalid authentication header')
+    throw new Error('Invalid authentication header');
 
-  const split = authHeader.split(' ')
-  const token = split[1]
+  const split = authHeader.split(' ');
+  const token = split[1];
 
-  return token
+  return token;
 }

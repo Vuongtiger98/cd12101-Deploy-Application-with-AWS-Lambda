@@ -1,85 +1,92 @@
+org: vuongtenant
+app: vuongtodo
 service: serverless-todo-app
 
 plugins:
   - serverless-iam-roles-per-function
 
-frameworkVersion: '3.24.1'
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-2'}
   environment:
+    TODOS_TABLE: Todos-${self:provider.stage}
+    TODOS_CREATED_AT_INDEX: CreatedAtIndex
     ATTACHMENT_S3_BUCKET: vuongbucket
-    SIGNED_URL_EXPIRATION: 300 # URL expiration time in seconds (5 minutes)
+    SIGNED_URL_EXPIRATION: 300  # URL expiration time in seconds (5 minutes)
+
+custom:
+  todosTable: ${self:provider.environment.TODOS_TABLE}
 
 functions:
-
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  # TODO: Configure this function
   getTodos:
     handler: src/lambda/http/getTodos.handler
     events:
       - http:
           method: get
           path: todos
+          authorizer: Auth
           cors: true
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.todosTable}
+        Resource: arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:custom.todosTable}
 
-  # TODO: Configure this function
   createTodo:
     handler: src/lambda/http/createTodos.handler
     events:
       - http:
           method: post
           path: todos
+          authorizer: Auth
           cors: true
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:PutItem
-        Resource: arn:aws:dynamodb:REGION:ACCOUNT_ID:table/TABLE_NAME
+        Resource: arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:custom.todosTable}
 
-  # TODO: Configure this function
   updateTodo:
     handler: src/lambda/http/updateTodo.handler
     events:
       - http:
           method: put
           path: todos/{todoId}
+          authorizer: Auth
           cors: true
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
-        Resource: arn:aws:dynamodb:REGION:ACCOUNT_ID:table/TABLE_NAME
+        Resource: arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:custom.todosTable}
 
-  # TODO: Configure this function
   deleteTodo:
     handler: src/lambda/http/deleteTodo.handler
     events:
       - http:
           method: delete
           path: todos/{todoId}
+          authorizer: Auth
           cors: true
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:DeleteItem
-        Resource: arn:aws:dynamodb:REGION:ACCOUNT_ID:table/TABLE_NAME
+        Resource: arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:custom.todosTable}
 
-  # TODO: Configure this function
   generateUploadUrl:
     handler: src/lambda/http/generateUploadUrl.handler
     events:
       - http:
           method: get
           path: todos/{todoId}/attachment
+          authorizer: Auth
           cors: true
     iamRoleStatements:
       - Effect: Allow
@@ -89,4 +96,29 @@ functions:
 
 resources:
   Resources:
-    # TODO: Add any necessary AWS resources
+    TodosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: todoId
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH  # Partition key
+          - AttributeName: todoId
+            KeyType: RANGE  # Sort key
+        BillingMode: PAY_PER_REQUEST
+        TableName: ${self:provider.environment.TODOS_TABLE}
+        LocalSecondaryIndexes:
+          - IndexName: ${self:provider.environment.TODOS_CREATED_AT_INDEX}
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL  # All attributes will be copied to the index
