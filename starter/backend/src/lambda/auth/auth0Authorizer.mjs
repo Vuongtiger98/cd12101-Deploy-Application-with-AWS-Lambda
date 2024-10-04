@@ -43,12 +43,29 @@ export async function handler(event) {
 }
 
 async function verifyToken(authHeader) {
-  const token = getToken(authHeader)
-  const jwt = jsonwebtoken.decode(token, { complete: true })
+  const token = getToken(authHeader);
+  const decodedToken = jsonwebtoken.decode(token, { complete: true });
 
-  // TODO: Implement token verification
-  return undefined;
+  if (!decodedToken) {
+    throw new Error('Invalid token');
+  }
+
+  const kid = decodedToken.header.kid;
+  const jwks = await getJwks();
+
+  const signingKey = jwks.keys.find(key => key.kid === kid);
+  if (!signingKey) {
+    throw new Error('Invalid token');
+  }
+
+  return jsonwebtoken.verify(token, signingKey, { algorithms: ['RS256'] });
 }
+
+async function getJwks() {
+  const response = await Axios.get(jwksUrl);
+  return response.data;
+}
+
 
 function getToken(authHeader) {
   if (!authHeader) throw new Error('No authentication header')

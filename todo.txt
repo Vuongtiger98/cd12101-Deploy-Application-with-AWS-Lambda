@@ -1,0 +1,40 @@
+./README.md:# Serverless TODO
+./README.md:To implement this project you need to implement a simple TODO application using AWS Lambda and Serverless framework. Search for all the `TODO:` comments in the code to find the placeholders that you need to implement.
+./README.md:This appliation will allow to create/remove/update/get TODO items. Each TODO item can optionally have an attachment image. Each user only has access to TODO items that he/she has created.
+./README.md:* `GetTodos` - should return all TODOs for a current user.
+./README.md:* `CreateTodo` - should create a new TODO for a current user. A shape of data send by a client application to this function can be found in the `CreateTodoRequest.ts` file
+./README.md:* `UpdateTodo` - should update a TODO item created by a current user. A shape of data send by a client application to this function can be found in the `UpdateTodoRequest.ts` file
+./README.md:* `DeleteTodo` - should delete a TODO item created by a current user. Expects an id of a TODO item to remove.
+./README.md:* `GenerateUploadUrl` - returns a presigned url that can be used to upload an attachment file for a TODO item.
+./README.md:To store TODO items you might want to use a DynamoDB table with local secondary index(es). A create a local secondary index you need to a create a DynamoDB resource like this:
+./README.md:    TableName: ${self:provider.environment.TODOS_TABLE}
+./README.md:This should start a development server with the React application that will interact with the serverless TODO application.
+./README.md:## Get all TODOs
+./README.md:To fetch all TODOs you would need to send the following GET request:
+./README.md:## Create a new TODO
+./README.md:To create a new TODO you would need to send a POST request and provide a JSON with two mandatory fields: `name` and `dueDate`.
+./README.md:## Update a TODO
+./README.md:To update a TODO you would need to send a PATCH request and provide one of the following fields: `name`, `dueDate`, and boolean `done`.
+./README.md:You would also need to provide an ID of an existing TODO in the URL.
+./README.md:curl --location --request PATCH 'https://{API-ID}.execute-api.us-east-1.amazonaws.com/dev/todos/{TODO-ID}' \
+./README.md:## Remove TODO
+./README.md:To remove a TODO you would need to send a `DELETE` request, and provide an ID of an existing TODO, as well as other parameters.
+./README.md:curl --location --request DELETE 'https://{API-ID}.execute-api.us-east-1.amazonaws.com/dev/todos/{TODO-ID}' \
+./README.md:curl --location --request POST 'https://{API-ID}.execute-api.us-east-1.amazonaws.com/dev/todos/{TODO-ID}/attachment' \
+./starter/backend/package.json:  "description": "Serverless TODO image app",
+./starter/backend/serverless.yml:  # TODO: Configure this function
+./starter/backend/serverless.yml:  # TODO: Configure this function
+./starter/backend/serverless.yml:  # TODO: Configure this function
+./starter/backend/serverless.yml:  # TODO: Configure this function
+./starter/backend/serverless.yml:  # TODO: Configure this function
+./starter/backend/serverless.yml:    # TODO: Add any necessary AWS resources
+./starter/backend/src/lambda/auth/auth0Authorizer.mjs:  // TODO: Implement token verification
+./starter/backend/src/lambda/http/createTodo.js:  // TODO: Implement creating a new TODO item
+./starter/backend/src/lambda/http/deleteTodo.js:  // TODO: Remove a TODO item by id
+./starter/backend/src/lambda/http/generateUploadUrl.js:  // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
+./starter/backend/src/lambda/http/getTodos.js:  // TODO: Get all TODO items for a current user
+./starter/backend/src/lambda/http/updateTodo.js:  // TODO: Update a TODO item with the provided id using values in the "updatedTodo" object
+./starter/client/src/components/NewTodoInput.jsx:      console.log('Failed to created a new TODO', e)
+./starter/client/src/components/Todos.jsx:      console.log('Failed to check a TODO', e)
+./starter/client/src/components/Todos.jsx:      <Header as="h1">TODOs</Header>
+./starter/client/src/components/Todos.jsx:        Loading TODOs
