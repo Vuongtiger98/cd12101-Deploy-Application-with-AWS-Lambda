@@ -15,20 +15,12 @@ const handler = async (event) => {
 
     return {
       statusCode: 204, // No Content
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': true,
-      },
       body: JSON.stringify({}), // No content to return
     };
   } catch (error) {
     console.error('Error updating TODO:', error);
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': true
-      },
       body: JSON.stringify({
         message: 'Could not update TODO',
       }),
@@ -39,6 +31,4 @@ const handler = async (event) => {
 // Wrap the handler with middy and use the necessary middleware
 export const main = middy(handler)
   .use(httpErrorHandler()) // Automatically handles errors
-  .use(cors({
-    credentials: true // Enable CORS with credentials
-  }));
+  .use(cors({ credentials: false })); // Enable CORS

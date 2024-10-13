@@ -17,17 +17,12 @@ const createTodoHandler = async (event) => {
 
   return {
     statusCode: 201,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Credentials': true
-    },
     body: JSON.stringify({
       item: todoItem,
     }),
   };
 };
 
-
 export const handler = middy(createTodoHandler)
   .use(httpErrorHandler()) // Handle errors
-  .use(cors({ credentials: true })); // Enable CORS
+  .use(cors({ credentials: false })); // Enable CORS

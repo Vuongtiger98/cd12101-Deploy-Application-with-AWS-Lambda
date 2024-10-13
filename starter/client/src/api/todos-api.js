@@ -8,6 +8,7 @@ export async function getTodos(idToken) {
     {
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin' : '*',
         Authorization: `Bearer ${idToken}`
       }
     }
@@ -23,6 +24,7 @@ export async function createTodo(idToken, newTodo) {
     {
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin' : '*',
         Authorization: `Bearer ${idToken}`
       }
     }
@@ -37,6 +39,7 @@ export async function patchTodo(idToken, todoId, updatedTodo) {
     {
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin' : '*',
         Authorization: `Bearer ${idToken}`
       }
     }
@@ -47,6 +50,7 @@ export async function deleteTodo(idToken, todoId) {
   await Axios.delete(`${process.env.REACT_APP_API_ENDPOINT}/todos/${todoId}`, {
     headers: {
       'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin' : '*',
       Authorization: `Bearer ${idToken}`
     }
   })
@@ -59,6 +63,7 @@ export async function getUploadUrl(idToken, todoId) {
     {
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin' : '*',
         Authorization: `Bearer ${idToken}`
       }
     }

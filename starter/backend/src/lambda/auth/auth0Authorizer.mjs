@@ -5,7 +5,7 @@ import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 
 const logger = createLogger('auth');
-const jwksUrl = 'https://dev-vwybuln2bv13l0dg.us.auth0.com/.well-known/jwks.json';
+const jwksUrl = 'https://dev-4fajhzpzyfxqsxtk.us.auth0.com/.well-known/jwks.json';
 
 const authHandler = async (event) => {
   try {
@@ -34,7 +34,7 @@ const authHandler = async (event) => {
         Statement: [
           {
             Action: 'execute-api:Invoke',
-            Effect: 'Deny',
+            Effect: 'Allow',
             Resource: '*',
           },
         ],

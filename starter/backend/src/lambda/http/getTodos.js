@@ -15,10 +15,6 @@ const handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': true
-      },
       body: JSON.stringify({
         items: todos,
       }),
@@ -27,10 +23,6 @@ const handler = async (event) => {
     logger.error('Error fetching TODOs', { error: error.message });
     return {
       statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': true
-      },
       body: JSON.stringify({
         message: 'Could not fetch TODOs',
       }),
@@ -41,6 +33,4 @@ const handler = async (event) => {
 // Wrap the handler with middy and use the necessary middleware
 export const main = middy(handler)
   .use(httpErrorHandler()) // Automatically handles errors
-  .use(cors({
-    credentials: true // Enable CORS with credentials
-  }));
+  .use(cors({ credentials: false })); // Enable CORS
