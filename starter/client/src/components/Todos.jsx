@@ -77,7 +77,7 @@ export function Todos() {
   async function onTodoDelete(todoId) {
     try {
       const accessToken = await getAccessTokenSilently({
-        audience: `https://dev-vwybuln2bv13l0dg.us.auth0.com/api/v2/`,
+        audience: `https://vuong-todos-api`,
         scope: 'delete:todo'
       })
       await deleteTodo(accessToken, todoId)
@@ -91,7 +91,7 @@ export function Todos() {
     try {
       const todo = todos[pos]
       const accessToken = await getAccessTokenSilently({
-        audience: `https://dev-vwybuln2bv13l0dg.us.auth0.com/api/v2/`,
+        audience: `https://vuong-todos-api`,
         scope: 'write:todo'
       })
       await patchTodo(accessToken, todo.todoId, {
@@ -128,7 +128,7 @@ export function Todos() {
     async function foo() {
       try {
         const accessToken = await getAccessTokenSilently({
-          audience: `https://dev-vwybuln2bv13l0dg.us.auth0.com/api/v2/`,
+          audience: `https://vuong-todos-api`,
           scope: 'read:todos'
         })
         console.log('Access token: ' + accessToken)

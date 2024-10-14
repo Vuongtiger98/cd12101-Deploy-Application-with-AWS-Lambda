@@ -31,7 +31,7 @@ export async function getTodosForUser(userId) {
     };
   
     const result = await docClient.query(params).promise();
-    return result.Items; // Return the list of TODO items
+    return result.Items || []; // Return an empty array if there are no items
   }
 
 export const updateTodo = async (todoId, userId, updatedTodo) => {
